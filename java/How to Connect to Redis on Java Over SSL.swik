@@ -1,0 +1,77 @@
+[h1] How to Connect to Redis on Java Over SSL 
+
+[p]Redis, an open-source, in-memory data structure store, is one of the most popular choices for building NoSQL databases. However, one major stumbling block for using Redis is that it does not come with any of its own encryption features.[|p]
+[p]Of course, any enterprise-class database must be able to guarantee the security of the information stored within it. If your database may be accessible by untrusted parties, you will need to develop your own encryption capabilities, enveloping data within an encryption protocol.[|p]
+[p]SSL (Secure Sockets Layer) is the protocol of choice for transmitting data between different servers or computers. Being able to securely connect to a server using SSL/TLS is an essential skill for any database developer.[|p]
+[p]Although SSL support for Redis may come in a future update, the feature is not currently on the table. According to the developers of Redis: "The idea of adding SSL support to Redis was proposed many times. However, currently, we believe that given the small percentage of users requiring SSL support, and the fact that each scenario tends to be different, using a different "tunneling" strategy can be better."[|p]
+[p]This means that developers will need to figure out their own way to get SSL to work with Redis. However, navigating the ins and outs of the SSL/TLS protocol can be challenging for developers, especially those without significant experience in security. You might have to follow a series of long, frustrating instructions and try to debug mysterious errors, wasting valuable development time.[|p]
+[p]Fortunately, there's a better solution, especially for those who are already programming in Java. Redisson is a Redis client for the Java programming language. It includes implementations of dozens of the most important classes and interfaces in Java for a distributed computing paradigm so that you can continue to use this functionality with Redis.[|p]
+[p]Thanks to Redisson, it's significantly easier to design, develop, and deploy large distributed systems using Redis.[|p]
+[p]Let's look at just how easy it is to connect to Redis over SSL with Redisson. An example for using Redisson with SSL and Java is below:[|p]
+
+[bq]
+import java.util.concurrent.ConcurrentMap;[br]
+import org.redisson.Redisson;[br]
+import org.redisson.api.RMap;[br]
+import org.redisson.api.RedissonClient;[br]
+import org.redisson.config.Config;[br]
+[br]
+public class MapExample {[br]
+[id1]    public static void main(String[] args) {[br]
+    [id2]    Config config = new Config();[br]
+    [id2]    // rediss - defines to use SSL for Redis connection[br]
+    [id2]    config.useSingleServer().setAddress("rediss://127.0.0.1:6379");[br]
+    [id2]    RedissonClient redisson = Redisson.create(config);[br]
+    [id2]    RMap<String, String> map = redisson.getMap("test");[br]
+    [id2]    map.put("mykey", "myvalue");[br]
+    [id2]    String value =  map.get("mykey");[br]
+    [id2]    // ...[br]
+    [id2]    redisson.shutdown();[br]
+[id1]    }[br]
+}[br]
+[|bq]
+
+[p]As you can see, Redisson makes it simple and straightforward to connect to Redis on Java over SSL. We use the "rediss" provisional protocol to designate a connection to Redis via SSL/TLS. We then instantiate a RedissonClient object, which represents a Redisson object with a synchronous/asynchronous interface.[|p]
+[p]Once created, the RedissonClient object can begin working with data immediately. In the example above, we can see the use of RMap object, which is a distributed implementation of the ConcurrentMap interface in Java. The RedissonClient object is able to securely store the RMap's data within Redis using SSL, avoiding the need for lengthy, time-consuming configurations.[|p]
+
+[h2] Configuring Redis to Accept SSL Connections With Stunnel
+
+[p]Stunnel is an open-source proxy application for wrapping client-server connections with SSL/TSL encryption. Because Redis does not include native support for SSL encryption, many developers use stunnel for secure client-server communications.[|p]
+[p]The good news is that Redisson already supports SSL on the client side, which means that there's no need for you to install stunnel on the client.[|p]
+[p]However, you'll still need to install stunnel on the Redis server in order to have encryption on both ends. To do so, follow the steps below on a system running Ubuntu.[|p]
+[p]First, use the apt-get tool to install stunnel by running the commands:[|p]
+
+[bq]
+sudo apt-get update[br]
+sudo apt-get install stunnel4[br]
+[|bq]
+
+[p]In order to enable stunnel to launch at startup, you must edit the /etc/default/stunnel4 file:[|p]
+
+[bq]
+sudo nano /etc/default/stunnel4[br]
+[|bq]
+
+[p]Modify the ENABLED parameter so that it reads, and then save and close the file.[|p]
+[p]Create SSL Certificate in the /etc/stunnel directory by follow command:[|p]
+
+[bq]
+sudo openssl -nodes -days 3650 req -x509 -newkey rsa:2048 -keyout /etc/stunnel/redis.key -out /etc/stunnel/redis.crt[br]
+[|bq]
+
+[p]Once you get certificate and key, you can create a stunnel config file for Redis located at /etc/stunnel/redis.conf. Inside, you need to define the location to PID file and configuration for Redis server:[|p]
+
+[bq]
+pid = /run/stunnel-redis.pid[br]
+[redis-server][br]
+accept = REDIS_SERVER_EXTERNAL_IP:6379[br]
+connect = 127.0.0.1:6379[br]
+cert = /etc/stunnel/redis.crt[br]
+key = /etc/stunnel/redis.key[br]
+[|bq]
+
+[h2]About Redisson
+
+[p]When you use Redisson, getting Redis to work with Java and SSL is just a matter of a few lines of code.[|p]
+[p]Enabling SSL connections is just one way that Redisson makes it easier for Java developers to work with Redis. From data structures and collections to locks and synchronizers, Redisson comes equipped with a variety of distributed objects that enable developers to use Java on top of Redis.[|p]
+[p]To learn more about using Redisson, visit the project page on GitHub.[|p]
