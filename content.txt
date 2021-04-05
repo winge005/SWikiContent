@@ -1,1 +1,2 @@
-How to Connect to Redis on Java Over SSL.swik,java,https://github.com/winge005/SWikiContent/blob/master/java/How%20to%20Connect%20to%20Redis%20on%20Java%20Over%20SSL.swik
+How to Connect to Redis on Java Over SSL.swik,java,https://raw.githubusercontent.com/winge005/SWikiContent/master/java/How%20to%20Connect%20to%20Redis%20on%20Java%20Over%20SSL.swik
+Docker Manifest – A Peek Into Image’s Manifest.json Files.swik,docker,https://raw.githubusercontent.com/winge005/SWikiContent/master/Docker%20Manifest%20–%20A%20Peek%20Into%20Image’s%20Manifest.json%20Files.swik

@@ -1,0 +1,95 @@
+[h1] Docker Manifest – A Peek Into Image’s Manifest.json Files 
+
+[h2] Docker Manifest – An Experimental Feature!
+
+[p]The image manifest provides a configuration and a set of layers for a container image.[|p]
+[p]This is an experimental feature. To enable this feature in the Docker CLI, one can edit the config.json file found in ~/.docker/config.json like :[|p]
+
+[bq]
+{[br]
+[id1]        "auths": {[br]
+[id2]                "https://index.docker.io/v1/": {[br]
+    [id3]                    "auth": "XXXXXXX"[br]
+[id2]                }[br]
+ [id1]       },[br]
+ [id1]       "HttpHeaders": {[br]
+      [id2]          "User-Agent": "Docker-Client/19.03.8 (linux)"[br]
+[id1]        },[br]
+ [id1]       "experimental": "enabled",[br]
+[id1]        "debug": true[br]
+}[br]
+[|bq]
+
+[h2] What Is ‘Docker Manifest’?
+
+[p]The docker manifest command does not work independently to perform any action. In order to work with the docker manifest or manifest list, we use sub-commands along with it. This manifest sub-command can enable us to interact with the image manifests. Furthermore, it also gives information about the OS and the architecture, that a particular image was built for.[|p]
+[p]A single manifest comprises of information about an image, it’s size, the layers and digest.[|p]
+[p]A manifest list is a list of image layers (manifests) that are, created by specifying one or more image names. It can then be used in the same way as an image name in docker pull and docker run commands.[|p]
+
+[h2] Commands to Get Started With:
+
+[p]After enabling this feature, one would be able to access the following command :[|p]
+[p]These commands are easy to use. It basically avoids the need for pulling and running and then testing the images locally, from a docker registry.[|p]
+[p]Next, to inspect an image manifest, follow this syntax,[|p]
+[p]docker manifest inspect image-name[|p]
+[p]As we can see, the image hello-world supports many different architectures.[|p]
+[p]As a result, it becomes very easy to identify the list of platforms that an image can run upon, without the need for ” pulling ” that image on that platform and then running it, to test if it supports such architecture or not.[|p]
+
+[h2] Image Layers
+
+[p]In this section, we will be talking about the image layers, their architecture.Each of the files that make up a docker image is known as a layer.These layers form a series of intermediate images, built one on top of the other in stages, where each layer is dependent on the layer immediately below it.[|p]
+[p]The hierarchy in which the layers are organized is very important, the layers that change frequently should be placed as high up the hierarchy as possible. This helps in efficient management of a docker image’s life cycle.[|p]
+[p]This is because, when one makes changes to a layer in your image, docker not only rebuilds that particular layer but all layers built from it. Therefore a change to a layer at the top of the stack involves the least amount of computational work to rebuild the entire image. Thus the layers with the least or can be said with no changes are kept at the bottom of the hierarchy formed.[|p]
+
+[h2] Let’s Walk Through an Example
+
+[p]We start with building a dockerfile with the following contents,[|p]
+
+[bq]
+FROM ubuntu:18.04[br]
+RUN echo "Hi Visitor."[br]
+[|bq]
+
+[p]When we build this dockerfile with no-cache option,[|p]
+[p]This results in creation of an image digest.[|p]
+[p]Upon exploring this image digest, we get[|p]
+
+[h2] Components of an Image Digest
+
+[p]Let’s discuss each of these components:[|p]
+
+[bq]
+Config file –
+Docker’s JSON config file describes the environment that built the docker image and its history.
+( here, 5d1cdcfd1c744987e4916f7815874391b29bff62e3df2d29885683e1b39e4c0a.json )
+[|bq]
+
+[p][b]manifest.json file –[|b][|p]
+[p]The manifest.json file describes the location of the layers and config file.[|p]
+
+[h2] Layers
+
+[p]Each layer is comprised of a json file (which looks like the config file), a VERSION file with the string 1.0 , and a layer.tar file containing the images files.[|p]
+[p]Looking into the manifest.json file,[|p]
+[p]The layers section here depicts all the layers as a directory having its own filesystem and layers built on top of the other forms an image. Each layer has it’s own version file, a json file, and a layer filesystem.[|p]
+
+[hr]
+[p][i]    An important Note : This layer.tar SHA is referenced inside the config file, and the location of the layer is in the manifest.[|i][|p]
+[hr]
+
+[h5]  NOTE:
+[p]When the same dockerfile is built again, a new digest is created for that build, irrespective of the fact, that the same file is being built again and in the same environment. The only difference that makes these two different digests is the container.key and the creation-timestamp.[|p]
+
+[p][b]Coming back to the manifest command,[|b][|p]
+[p]We can use manifest command with a set of sub-commands, like,[|p]
+
+[l]    Manifest create: To create a manifest / manifest list locally in order to annotate and push to a registry.[|l]
+[l]    Manifest annotate: To provide additional information to a local image manifest / manifest list.[|l]
+[br]
+
+[p]Annotations allowed are the architecture and the operating system (overriding the image’s current values), OS features, and architecture variant values.[|p]
+
+    [l]Manifest push: To push a manifest / manifest list to a repository.[|l]
+[br]
+
+[p]I hope this blog gives you a brief understanding of the concept of manifest files. One can always refer to the official documentation of Docker, for more information.[|p]
