@@ -2,7 +2,7 @@ How to Connect to Redis on Java Over SSL.swik[|]java[|]https://raw.githubusercon
 Docker Manifest – A Peek Into Image’s Manifest.json Files.swik[|]docker[|]https://raw.githubusercontent.com/winge005/SWikiContent/master/docker/Docker%20Manifest%20%E2%80%93%20A%20Peek%20Into%20Image%E2%80%99s%20Manifest.json%20Files.swik
 spring boot run and build in docker.swik[|]spring boot[|]https://raw.githubusercontent.com/winge005/SWikiContent/master/spring%20boot/spring%20boot%20run%20and%20build%20in%20docker.swik
 how to manage transactions in redis on java.swik[|]java[|]https://raw.githubusercontent.com/winge005/SWikiContent/master/java/how%20to%20manage%20transactions%20in%20redis%20on%20java.swik
-spring boot and oauth2 getting the authorization code.swik[|]spring boot[|]https://raw.githubusercontent.com/winge005/SWikiContent/master/spring%20boot/spring%20boot%20and%20oauth2%20getting%20the%20authorization%20code.swik
+spring boot and oauth2 getting the authorization code.swik[|]spring boot[|]https://raw.githubusercontent.com/winge005/SWikiContent/master/spring%20boot/spring%20boot%20and%20oauth2%20getting%20the%20authorization%20Code.swik
 11266584-screen-shot-2019-02-13-at-22850-pm.png[|]resources[|]https://raw.githubusercontent.com/winge005/SWikiContent/master/resources/11266584-screen-shot-2019-02-13-at-22850-pm.png
 11266589-screen-shot-2019-02-13-at-23851-pm.png[|]resources[|]https://raw.githubusercontent.com/winge005/SWikiContent/master/resources/11266589-screen-shot-2019-02-13-at-23851-pm.png
 11266591-screen-shot-2019-02-13-at-24046-pm.png[|]resources[|]https://raw.githubusercontent.com/winge005/SWikiContent/master/resources/11266591-screen-shot-2019-02-13-at-24046-pm.png
