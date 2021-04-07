@@ -9,3 +9,12 @@ spring boot and oauth2 getting the authorization code.swik[|]spring boot[|]https
 11266593-screen-shot-2019-02-13-at-24055-pm.png[|]resources[|]https://raw.githubusercontent.com/winge005/SWikiContent/master/resources/11266593-screen-shot-2019-02-13-at-24055-pm.png
 11266594-screen-shot-2019-02-13-at-24106-pm.png[|]resources[|]https://raw.githubusercontent.com/winge005/SWikiContent/master/resources/11266594-screen-shot-2019-02-13-at-24106-pm.png
 11266595-screen-shot-2019-02-13-at-24116-pm.png[|]resources[|]https://raw.githubusercontent.com/winge005/SWikiContent/master/resources/11266595-screen-shot-2019-02-13-at-24116-pm.png
+testing spring boot integration with vault and postgres using testcontainers framework.swik[|]spring boot[|]https://raw.githubusercontent.com/winge005/SWikiContent/master/spring%20boot/testing%20spring%20boot%20integration%20with%20vault%20and%20postgres%20using%20testcontainers%20framework.swik
+testcontainers-2.png[|]resources[|]https://raw.githubusercontent.com/winge005/SWikiContent/master/resources/testcontainers-2.png
+testcontainers-128129.png[|]resources[|]https://raw.githubusercontent.com/winge005/SWikiContent/master/resources/testcontainers-128129.png
+magic with the spring boot actuator.swik[|]spring boot[|]https://raw.githubusercontent.com/winge005/SWikiContent/master/spring%20boot/magic%20with%20the%20spring%20boot%20actuator.swik
+continuous security using owasp.swik.swik[|]general[|]https://raw.githubusercontent.com/winge005/SWikiContent/master/general/continuous%20security%20using%20owasp.swik
+Continuous Security Using OWASPdc.png[|]resources[|]https://raw.githubusercontent.com/winge005/SWikiContent/master/resources/Continuous Security%20Using%20OWASPdc.png
+Continuous Security Using OWASPdepcheck-fps.png[|]resources[|]https://raw.githubusercontent.com/winge005/SWikiContent/master/resources/Continuous%20Security%20Using%20OWASPdepcheck-fps.png
+Continuous Security Using OWASPreport-sample.png[|]resources[|]https://raw.githubusercontent.com/winge005/SWikiContent/master/resources/Continuous%20Security%20Using%20OWASPreport-sample.png
+

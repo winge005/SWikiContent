@@ -1,0 +1,150 @@
+[h1] Continuous Security Using OWASP
+
+[p]Continuous integration in the IT industry is a well accepted and relatively common practice. As companies move towards the use of cloud deployments they often implement continuous delivery pipelines — thus reducing the time-to-delivery of a new feature to days or even hours. In the case of cloud deployments, security is often evaluated off-cycle by a dedicated team.[|p]
+[p]In this article, we showcase how to use the [a|Open Web Application Security Project|https://www.owasp.org/index.php/Main_Page] (OWASP) [a|Dependency Check|https://www.owasp.org/index.php/OWASP_Dependency_Check] --a tool which allows developers to automatically evaluate all of the transitive dependencies of their product during the build phase. This approach puts security squarely back into the development cycle. Security is brought under the control of the development team and, as it is part of the continuous integration loop, promotes a security-by-design approach to the development cycle.[|p]
+
+[img|Continuous Security Using OWASPdc.png][br]
+[br]
+
+[h2] Why Is it Important?
+
+[p]The development team should always be responsible for the security of the solution in the first place. Although this adds additional work for the team, it is important to evaluate how the added cost will pay off in the long run through enhanced security and mitigated risks.[|p]
+
+[h2] Continuous Delivery
+
+[p]With continuous delivery, the teams are empowered with the ability to rapidly implement and deploy new features. While this creates huge value to the end customer, it also introduces new risks — as each new feature may depend on a new/updated library. This library — or one of its transitive dependencies — may contain a known security issue. In adding such a dependency, it becomes easier for an attacker to exploit a given weakness.[|p]
+[p]This risk does not apply only to components on the system perimeter, but also to those deep within the system. For example, an attacker may break in (past the perimeter) using one attack and escalate his data access using some other internal services.[|p]
+
+[h2] Dependencies Hidden Inside Artifacts
+
+[p]Deployable artifacts (Docker images, RPMs, Spring Boot fat-jars…) are generally not distributed with some bill-of-materials provided. Due to this, when the application is tested by an external security audit team, they are able to perform only black-box style testing using common attack vectors. In this case the majority of the deeply rooted vulnerabilities remain hidden inside the application and are not discovered during a routine audit. Clearly this is a risk that should be mitigated and tested for early on, a task that is best left to those who develop the product.[|p]
+
+[h2] Ensuring New Versions of Your Libraries
+
+[p]Last but not least, the majority of applications are dependent on one or multiple de-facto standard frameworks — such as Spring Framework or Hibernate. As these frameworks are heavily used, they are also thoroughly tested by their users as well as security experts. Due to this heavy usage, many vulnerabilities are discovered. This is not to imply that developers from Spring or Hibernate are doing a poor job, it is simply a fact that no software is perfect and with a wider user base more deficiencies are uncovered and dealt with.[|p]
+[p]This leads to one significant advantage for the application developers — in many companies it is hard for the development team to justify performing an update of third-party libraries. Often these teams are pushed to keep some legacy version for many months/years. With continuous security, the team has a strong argument to perform an update, as no stakeholder will block the dependencies update if there is a well known security risk to the end customer and their data.[|p]
+
+[h2] About NIST NVD
+
+[p]Now let’s dive into the actual implementation of continuous security using the OWASP Dependency Check. We will demonstrate how the tool is used and several of the recommended methods we use to enhance our workflow during its implementation.[|p]
+[p]OWASP Dependency Check is a utility which downloads the National Vulnerability Database (NVD), project maintained by National Institute of Standards and Technology (NIST), to your machine (or the builder). Each vulnerability in the NVD has a Common Vulnerabilities and Exposures (CVE) report assigned and standardized scoring. The CVE report itself contains a description of the attack, public references (bug trackers, etc.) as well as a unique identifier of the vulnerability.[|p]
+
+[h2] Gradle Dependency Check
+
+[p]In this example, the Gradle OWASP Dependency Check plugin is used. The actual build technology is not that important, as the plugin also exists for Maven, Ant, sbt or the command line. Internally this plugin contains a variety of analyzers which are able to inspect (not only Java dependencies) but also Node.js or .NET dependencies and experimentally also Ruby, Python or CMake.[|p]
+
+[bq]
+buildscript {[br]
+[id1]    repositories {[br]
+    [id2]    mavenCentral()[br]
+[id1]    }[br]
+[id1]    dependencies {[br]
+    [id2]    classpath 'org.owasp:dependency-check-gradle:4.0.1' // introduce the OWASP plugin to our build[br]
+[id1]    }[br]
+}[br]
+[br]
+apply plugin: 'java'[br]
+apply plugin: 'org.owasp.dependencycheck' // apply the plugin[br]
+[br]
+group 'com.zoomint'[br]
+version '1.0.0'[br]
+[br]
+dependencies {[br]
+[id1]    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.3' // outdated jackson[br]
+}[br]
+[br]
+build.dependsOn dependencyCheckAnalyze // lets make build dependent on the check[br]
+[br]
+repositories {[br]
+[id1]    mavenCentral()[br]
+}[br]
+[|bq]
+
+[p]This Gradle script tests a simple project containing a dependency on [a|Jackson|https://github.com/FasterXML] ——a popular JSON (de)serialization library. In this example, an outdated version (2.9.3) was used intentionally, the current version is 2.9.7. When the gradle build is executed in order to assemble the project, a dependency-check-report.html file is generated in the build/reports directory.[|p]
+
+[h2] Analyzing Vulnerabilities
+
+[img|Continuous Security Using OWASPreport-sample.png][br]
+[br]
+
+[p]The Dependency Check Report shows that there is a single vulnerable dependency jackson-databind-2.9.4.jar, which is affected by three known vulnerabilities. All of them — when used by an attacker — can enable remote code execution. Apart from links to the relevant CVEs, the report also includes references to additional documents (these are very useful when performing an in-depth investigation).[|p]
+[p]In this case, the reports indicate that all Jackson versions before 2.9.5 are affected. It is clear that in order to resolve these vulnerabilities it is necessary to update to the latest patch version (2.9.7).[|p]
+
+[h2] Failing the Build
+
+[p]Although the plugin writes all vulnerabilities that are found to the build log, it is impractical to check all of them after each build. It is preferable that the build is forced to fail in the case that there is any vulnerability. To do so, add the following code snippet to the build:[|p]
+
+[bq]
+dependencyCheck {[br]
+[id1]    failBuildOnCVSS = 0[br]
+[id1]    suppressionFile = 'cve-suppress.xml'[br]
+}[br]
+[|bq]
+
+[p]The failBuildOnCVSS parameter instructs the plugin to fail in case any dependency has a [a|CVSS Score|https://nvd.nist.gov/vuln-metrics/cvss] higher than zero (this is effectively a zero tolerance level for vulnerabilities). CVSS takes into account both the exploitability and impact of the given vulnerability, hence low numbers mean that the vulnerability is either impractical to exploit or that the impact is limited (or both). High numbers indicate that the given vulnerability poses an immediate threat to your application (easy to exploit, big impact).[|p]
+[p]Once we set the failBuildOnCVSS property and rerun the build (with Jackson 2.9.3), the build will fail and logs will contain the following output:[|p]
+
+[bq]
+Output of build[br]
+> Task :dependencyCheckAnalyze FAILED[br]
+FAILURE: Build failed with an exception.[br]
+* What went wrong:[br]
+Execution failed for task ':dependencyCheckAnalyze'.[br]
+>[br]
+[br]
+Dependency-Analyze Failure:[br]
+One or more dependencies were identified with vulnerabilities that have a CVSS score greater then '0.0': CVE-2017-17485, CVE-2018-7489, CVE-2018-5968[br]
+See the dependency-check report for more details.[br]
+[|bq]
+
+[h2] Handling False Positives
+
+[p]All software systems and testing tools are imperfect. The OWASP dependency check is no exception. It may (and it does) happen that the OWASP reports a false positive (FP) — a vulnerability which is triggered by the incorrect matching of the CVEs to your dependencies. In these cases, it is necessary to suppress these warnings. For example, the following FP is triggered by the OWASP plugin 3.3.2 for PostgreSQL JDBC driver — while the real vulnerability is for the PostgreSQL installer.[|p]
+[p]To suppress this FP, it is necessary to click on the suppress button in the Dependency Check report and copy the generated snippet to the cve-supress.xml file that was configured in the previous step.[|p]
+
+[img|Continuous Security Using OWASPdepcheck-fps.png][br]
+[br]
+
+[bq]
+<?xml version="1.0" encoding="UTF-8"?>[br]
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.2.xsd">[br]
+[id1]    <suppress>[br]
+[id2]        <notes>[br]
+[id3]          <![CDATA[[br]
+[id4]             file name: postgresql-9.1-901.jdbc4.jar[br]
+[id3]          ]]>[br]
+[id2]        </notes>[br]
+[id2]        <gav regex="true">^postgresql:postgresql:.*$</gav>[br]
+[id2]        <cve>CVE-2016-7048</cve>[br]
+[id1]    </suppress>[br]
+</suppressions>[br]
+[|bq]
+
+[p]When the build is rerun, the false positive is ignored.[|p]
+
+[h2] Handling True Positives
+
+[p]Even though it will be necessary to occasionally deal with false positives, the bulk of the work is in handling the real vulnerabilities in our software. Let’s go through a few common scenarios and discuss how to resolve them.[|p]
+
+[h3] Update to Latest Patch
+
+[p]For large libraries — such as Spring Framework or Hibernate — it is often the case that by the time the vulnerability is publicly disclosed, a patched version is already available. Fixing the vulnerability is often as easy as updating your dependencies to the latest version or the latest release train.[|p]
+
+[h4] There Is No New Patch
+
+[p]Sometimes we are not that fortunate — as there is no fix at the moment for the vulnerability. In this case, it is necessary to take a closer look at the vulnerability and follow-up with one of the following two scenarios:[|p]
+
+[h4] The Vulnerability Does Not Apply to the Project
+
+[p]The vulnerability may be TP, but the library is being used in a different way. For example, if the library allows the use of web-sockets (and this feature is vulnerable), but this feature is not used in the application there is no cause for concern. It is safe to suppress the violation (and note the reason in the suppression file for future reference).[|p]
+
+[h4] The Vulnerability Applies to the Project
+
+[p]The worst case scenario is when there is no fix for the given vulnerability and it applies to our project. In this case, it is necessary to asses the risks.[|p]
+[p]The more positive case is when the vulnerable library is under active development and the authors are aware of the issue. In this case it is possible to postpone the release until the fix is available or to use some pre-release version if available. Or assess the risk and if viable, go with a vulnerable version (and create a task in the bug tracker to upgrade as soon as possible).[|p]
+[p]It may be the case that the vulnerability is severe and it will not be fixed as the library is not maintained anymore. In this case it may be time to rewrite the functionality in order to utilize some other library or to wrap the library into an additional input validation logic (or even take another measure).[|p]
+
+[h2] Conclusion
+
+[p]Deploying an automated tool which performs security testing during deployment leads to two outcomes: enhanced security that is ensured by process improvement and regular internal testing ensures that the product and dependencies are updated and secure. A security-by-design mindset is instilled and reaffirmed in the development team themselves as they maintain responsibility for the continuous testing and patching of the product during the development cycle. Security remains everyone’s responsibility, not only a dedicated team of external experts.[|p]
+
